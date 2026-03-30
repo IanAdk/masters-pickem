@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masters Pick'em 2026</title>
+<style>
+  :root {
+    --green:    #006747;
+    --dkgreen:  #004d35;
+    --gold:     #FFBE00;
+    --dkgold:   #c99000;
+    --white:    #ffffff;
+    --offwhite: #f5f0e8;
+    --gray:     #888;
+    --text:     #1a1a1a;
+    --cut:      #cc2200;
+    --shadow:   0 2px 12px rgba(0,0,0,.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--offwhite);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--green);
+    color: var(--white);
+    padding: 18px 24px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+  }
+  header h1 { font-size: 1.5rem; letter-spacing: .04em; }
+  header h1 span { color: var(--gold); }
+  .header-sub { font-size: .8rem; opacity: .8; margin-top: 2px; font-style: italic; }
+  #lock-badge {
+    background: var(--gold);
+    color: var(--dkgreen);
+    font-size: .75rem;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  #lock-badge.locked { background: var(--cut); color: white; }
+
+  /* ── Nav tabs ── */
+  nav {
+    background: var(--dkgreen);
+    display: flex;
+    gap: 2px;
+    padding: 0 20px;
+  }
+  nav button {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,.6);
+    padding: 10px 20px;
+    font-size: .9rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  nav button.active, nav button:hover {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* ── Main content ── */
+  main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+
+  /* ── Scoreboard ── */
+  #scoreboard { display: none; }
+  .score-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .score-header h2 { color: var(--green); font-size: 1.2rem; }
+  #refresh-btn {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: .85rem;
+  }
+  #refresh-btn:hover { background: var(--dkgreen); }
+  #last-updated { font-size: .75rem; color: var(--gray); margin-top: 2px; }
+
+  .board-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .board-card-header {
+    background: var(--green);
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .board-rank { font-size: 1.1rem; font-weight: bold; margin-right: 10px; color: var(--gold); }
+  .board-player-name { font-size: 1rem; font-weight: bold; flex: 1; }
+  .board-total {
+    font-size: 1.2rem;
+    font-weight: bold;
+    min-width: 52px;
+    text-align: right;
+  }
+  .board-total.under { color: var(--gold); }
+  .board-total.over  { color: #ff9999; }
+  .board-total.even  { color: white; }
+
+  .board-golfers { padding: 10px 16px 12px; display: flex; flex-direction: column; gap: 5px; }
+  .golfer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .88rem;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0ede8;
+  }
+  .golfer-row:last-child { border-bottom: none; }
+  .tier-badge {
+    font-size: .68rem;
+    font-weight: bold;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: var(--green);
+    color: white;
+    min-width: 30px;
+    text-align: center;
+  }
+  .tier-badge.alt { background: #7a5c00; }
+  .tier-badge.alt-active { background: #c99000; color: #1a1000; }
+  .golfer-name { flex: 1; }
+  .golfer-score { font-weight: bold; min-width: 36px; text-align: right; }
+  .golfer-score.under { color: var(--green); }
+  .golfer-score.over  { color: var(--cut); }
+  .golfer-score.even  { color: var(--gray); }
+  .mc-badge {
+    font-size: .65rem;
+    background: var(--cut);
+    color: white;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .active-badge {
+    font-size: .65rem;
+    background: var(--gold);
+    color: var(--dkgreen);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: bold;
+  }
+  .birdie-row {
+    font-size: .75rem;
+    color: var(--gray);
+    padding: 4px 16px 8px;
+    font-style: italic;
+  }
+
+  #espn-status {
+    font-size: .78rem;
+    color: var(--gray);
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  #espn-status.live { color: var(--green); font-style: normal; font-weight: bold; }
+
+  /* ── Pick wizard ── */
+  #picker { display: none; }
+  .wizard-header { margin-bottom: 20px; }
+  .wizard-header h2 { color: var(--green); font-size: 1.15rem; }
+  .wizard-header p { font-size: .88rem; color: var(--gray); margin-top: 4px; }
+
+  .step-progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+  .step-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    font-weight: bold;
+    background: #ddd;
+    color: #888;
+    flex-shrink: 0;
+  }
+  .step-dot.done { background: var(--green); color: white; }
+  .step-dot.active { background: var(--gold); color: var(--dkgreen); }
+
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  .step-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+  .tier-label {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--dkgreen);
+    font-size: .7rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  .golfer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .golfer-card {
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all .12s;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .golfer-card:hover { border-color: var(--green); background: #f0f8f0; }
+  .golfer-card.selected {
+    border-color: var(--gold);
+    background: #fffae6;
+    box-shadow: 0 0 0 2px var(--gold);
+  }
+  .golfer-card input[type="radio"] { display: none; }
+  .golfer-card-inner { flex: 1; }
+  .golfer-card-name { font-size: .9rem; font-weight: bold; }
+  .golfer-card-odds { font-size: .75rem; color: var(--gray); }
+  .golfer-card-rank { font-size: .7rem; color: var(--gray); }
+  .check-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+  }
+  .golfer-card.selected .check-icon {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--dkgreen);
+  }
+
+  /* Alt search */
+  #alt-search {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: .9rem;
+    margin-bottom: 12px;
+    font-family: inherit;
+  }
+  #alt-search:focus { outline: none; border-color: var(--green); }
+
+  /* Name + birdie step */
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: .85rem; font-weight: bold; color: var(--green); margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: .95rem;
+    font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--green); }
+
+  .summary-box {
+    background: var(--green);
+    color: white;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    font-size: .88rem;
+  }
+  .summary-box h3 { color: var(--gold); margin-bottom: 10px; font-size: .95rem; }
+  .summary-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.15); }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-label { opacity: .75; }
+
+  .wizard-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+  .btn-back {
+    background: transparent;
+    border: 2px solid var(--green);
+    color: var(--green);
+    padding: 9px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: .9rem;
+    font-family: inherit;
+  }
+  .btn-back:hover { background: #eaf3ee; }
+  .btn-next {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 9px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: .9rem;
+    font-family: inherit;
+    font-weight: bold;
+  }
+  .btn-next:hover { background: var(--dkgreen); }
+  .btn-next:disabled { background: #aaa; cursor: not-allowed; }
+  .btn-submit {
+    background: var(--gold);
+    color: var(--dkgreen);
+    border: none;
+    padding: 10px 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: bold;
+  }
+  .btn-submit:hover { background: var(--dkgold); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--dkgreen);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: .9rem;
+    box-shadow: var(--shadow);
+    display: none;
+    z-index: 100;
+    text-align: center;
+  }
+  .toast.show { display: block; }
+  .toast.error { background: var(--cut); }
+
+  .locked-notice {
+    background: var(--cut);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: .92rem;
+    text-align: center;
+  }
+
+  /* ESPN config */
+  .espn-config {
+    background: white;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .85rem;
+  }
+  .espn-config label { color: var(--green); font-weight: bold; white-space: nowrap; }
+  .espn-config input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: .85rem;
+    font-family: monospace;
+  }
+  .espn-config button {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: .82rem;
+  }
+
+  @media (max-width: 600px) {
+    header { flex-direction: column; gap: 8px; align-items: flex-start; }
+    .golfer-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⛳ <span>Masters</span> Pick'em 2026</h1>
+    <div class="header-sub">Augusta National · April 9–12, 2026</div>
+  </div>
+  <div id="lock-badge">Pick lock: loading…</div>
+</header>
+
+<nav>
+  <button id="tab-board" onclick="showTab('board')">Leaderboard</button>
+  <button id="tab-pick"  onclick="showTab('pick')">My Picks</button>
+</nav>
+
+<main>
+
+  <!-- ── Scoreboard ── -->
+  <div id="scoreboard">
+    <div class="score-header">
+      <div>
+        <h2>Team Standings</h2>
+        <div id="last-updated"></div>
+      </div>
+      <button id="refresh-btn" onclick="loadScoreboard()">↻ Refresh</button>
+    </div>
+
+    <div class="espn-config">
+      <label>ESPN Event ID:</label>
+      <input id="espn-event-id" type="text" value="" placeholder="e.g. 401703476" title="Find at site.api.espn.com/apis/site/v2/sports/golf/leaderboard — set the Masters event ID here">
+      <button onclick="saveEventId()">Set</button>
+    </div>
+
+    <div id="espn-status">ESPN: not loaded</div>
+    <div id="board-container"></div>
+  </div>
+
+  <!-- ── Picker ── -->
+  <div id="picker">
+    <div class="wizard-header">
+      <h2>Submit Your Picks</h2>
+      <p>Choose one golfer from each tier. Picks lock April 9 at 6:00 AM ET.</p>
+    </div>
+
+    <div id="locked-msg" class="locked-notice" style="display:none">
+      🔒 Picks are locked. The Masters has begun!
+    </div>
+
+    <div id="wizard-body">
+      <div class="step-progress" id="step-dots"></div>
+
+      <!-- Step 1: Tier A -->
+      <div class="step-panel" id="step-0">
+        <div class="step-title">Step 1 of 5 — Tier A Golfer</div>
+        <div class="tier-label">TIER A · Ranks 1–10 · Favorites</div>
+        <div class="golfer-grid" id="grid-A"></div>
+        <div class="wizard-actions">
+          <button class="btn-next" onclick="nextStep(0)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Tier B -->
+      <div class="step-panel" id="step-1">
+        <div class="step-title">Step 2 of 5 — Tier B Golfer</div>
+        <div class="tier-label">TIER B · Ranks 11–20 · Contenders</div>
+        <div class="golfer-grid" id="grid-B"></div>
+        <div class="wizard-actions">
+          <button class="btn-back" onclick="prevStep(1)">← Back</button>
+          <button class="btn-next" onclick="nextStep(1)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Tier C -->
+      <div class="step-panel" id="step-2">
+        <div class="step-title">Step 3 of 5 — Tier C Golfer</div>
+        <div class="tier-label">TIER C · Ranks 21–30 · Long Shots</div>
+        <div class="golfer-grid" id="grid-C"></div>
+        <div class="wizard-actions">
+          <button class="btn-back" onclick="prevStep(2)">← Back</button>
+          <button class="btn-next" onclick="nextStep(2)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Alternate -->
+      <div class="step-panel" id="step-3">
+        <div class="step-title">Step 4 of 5 — Alternate Golfer</div>
+        <div class="tier-label">ALTERNATE · Ranks 31–101 · Slots in if a main misses cut</div>
+        <input id="alt-search" type="text" placeholder="Search golfer name…" oninput="filterAlts()">
+        <div class="golfer-grid" id="grid-Alt"></div>
+        <div class="wizard-actions">
+          <button class="btn-back" onclick="prevStep(3)">← Back</button>
+          <button class="btn-next" onclick="nextStep(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Name + birdie -->
+      <div class="step-panel" id="step-4">
+        <div class="step-title">Step 5 of 5 — Your Info</div>
+        <div class="summary-box" id="pick-summary"></div>
+        <div class="form-group">
+          <label>Your Name</label>
+          <input id="player-name" type="text" placeholder="First name or nickname" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Birdie Guess (tiebreaker)</label>
+          <input id="birdie-guess" type="number" min="0" max="9999" placeholder="Total birdies for the whole tournament">
+        </div>
+        <div class="wizard-actions">
+          <button class="btn-back" onclick="prevStep(4)">← Back</button>
+          <button class="btn-submit" onclick="submitPicks()">Submit Picks ⛳</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+// Replace with your deployed Apps Script web app URL
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+// Pick lock: April 9, 2026 at 6:00 AM Eastern Time
+const PICK_LOCK = new Date('2026-04-09T06:00:00-04:00');
+
+// ESPN API — event ID for The Masters 2026 (update once known)
+let ESPN_EVENT_ID = localStorage.getItem('mastersEventId') || '';
+
+// ── State ────────────────────────────────────────────────────────────────────
+let golfers   = [];   // all golfers from Apps Script
+let picks     = [];   // all picks from Apps Script
+let espnData  = {};   // map: golfer name → { score, missedCut, pos }
+let selections = { A: null, B: null, C: null, Alt: null };
+let currentStep = 0;
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.getElementById('espn-event-id').value = ESPN_EVENT_ID;
+updateLockBadge();
+showTab('board');
+loadAll();
+setInterval(loadScoreboard, 90000); // auto-refresh every 90s
+
+function updateLockBadge() {
+  const now    = new Date();
+  const locked = now >= PICK_LOCK;
+  const badge  = document.getElementById('lock-badge');
+  if (locked) {
+    badge.textContent = '🔒 Picks Locked';
+    badge.classList.add('locked');
+  } else {
+    const diff = PICK_LOCK - now;
+    const days = Math.floor(diff / 86400000);
+    const hrs  = Math.floor((diff % 86400000) / 3600000);
+    badge.textContent = days > 0
+      ? `Lock in ${days}d ${hrs}h`
+      : hrs > 0
+        ? `Lock in ${hrs}h`
+        : 'Locking soon!';
+  }
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+function showTab(tab) {
+  document.getElementById('scoreboard').style.display = tab === 'board' ? '' : 'none';
+  document.getElementById('picker').style.display     = tab === 'pick'  ? '' : 'none';
+  document.getElementById('tab-board').classList.toggle('active', tab === 'board');
+  document.getElementById('tab-pick').classList.toggle('active',  tab === 'pick');
+  if (tab === 'pick') renderWizard();
+}
+
+// ── Data loading ─────────────────────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadGolfers(), loadPicks()]);
+  renderWizard();
+  loadScoreboard();
+}
+
+async function loadGolfers() {
+  try {
+    const r = await fetch(`${APPS_SCRIPT_URL}?action=golfers`);
+    golfers  = await r.json();
+  } catch {
+    // fall back to embedded data if Apps Script unreachable
+    golfers = EMBEDDED_GOLFERS;
+  }
+}
+
+async function loadPicks() {
+  try {
+    const r = await fetch(`${APPS_SCRIPT_URL}?action=picks`);
+    picks    = await r.json();
+  } catch {
+    picks = [];
+  }
+}
+
+async function loadScoreboard() {
+  await loadPicks();
+  await loadESPN();
+  renderBoard();
+}
+
+async function loadESPN() {
+  const statusEl = document.getElementById('espn-status');
+  if (!ESPN_EVENT_ID) {
+    statusEl.textContent = 'ESPN: set an Event ID above to load live scores';
+    statusEl.className = '';
+    return;
+  }
+  try {
+    const url = `https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga&event=${ESPN_EVENT_ID}`;
+    const r   = await fetch(url);
+    const d   = await r.json();
+    espnData  = {};
+    const event = d.events && d.events[0];
+    if (!event) { statusEl.textContent = 'ESPN: event not found'; return; }
+    const comp = event.competitions && event.competitions[0];
+    if (!comp)  { statusEl.textContent = 'ESPN: no competition data'; return; }
+    for (const c of comp.competitors || []) {
+      const name = c.athlete && c.athlete.displayName;
+      if (!name) continue;
+      const scoreStr = c.score || '0';
+      const score    = parseScore(scoreStr);
+      const status   = c.status && c.status.type && c.status.type.name;
+      const pos      = c.status && c.status.displayValue;
+      const missed   = status === 'STATUS_MISSED_CUT' || (pos && pos.toUpperCase().includes('MC'));
+      espnData[normName(name)] = { score, missedCut: missed, pos: pos || '', raw: scoreStr };
+    }
+    const live = event.status && event.status.type && event.status.type.name === 'STATUS_IN_PROGRESS';
+    statusEl.textContent = live
+      ? `⛳ LIVE — ${event.name || 'The Masters'}`
+      : `ESPN: ${event.name || 'The Masters'} · ${event.status && event.status.type && event.status.type.shortDetail || 'loaded'}`;
+    statusEl.className = live ? 'live' : '';
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    document.getElementById('espn-status').textContent = 'ESPN: unable to load (' + e.message + ')';
+  }
+}
+
+function parseScore(s) {
+  if (!s || s === 'E' || s === 'EVEN') return 0;
+  const n = parseInt(s, 10);
+  return isNaN(n) ? 0 : n;
+}
+
+function normName(n) {
+  return n.toLowerCase().replace(/[^a-z ]/g, '').trim();
+}
+
+function saveEventId() {
+  ESPN_EVENT_ID = document.getElementById('espn-event-id').value.trim();
+  localStorage.setItem('mastersEventId', ESPN_EVENT_ID);
+  loadScoreboard();
+}
+
+// ── Scoreboard rendering ──────────────────────────────────────────────────────
+function renderBoard() {
+  const container = document.getElementById('board-container');
+  if (!picks.length) {
+    container.innerHTML = '<p style="color:#888;font-style:italic">No picks submitted yet.</p>';
+    return;
+  }
+
+  const hasESPN = Object.keys(espnData).length > 0;
+
+  // Build team score objects
+  const teams = picks.map(p => {
+    const slots = [
+      { label: 'A',   name: p.tierA,     isMC: false, isAlt: false },
+      { label: 'B',   name: p.tierB,     isMC: false, isAlt: false },
+      { label: 'C',   name: p.tierC,     isMC: false, isAlt: false },
+      { label: 'Alt', name: p.alternate, isMC: false, isAlt: true  },
+    ];
+
+    let total = 0;
+    let altActive = false;
+    const rows = [];
+
+    // Check each main golfer
+    for (const slot of slots.slice(0, 3)) {
+      const esp = hasESPN ? espnData[normName(slot.name)] : null;
+      slot.isMC = esp ? esp.missedCut : false;
+      slot.score = esp ? esp.score : null;
+      slot.pos   = esp ? esp.pos   : '';
+      rows.push(slot);
+    }
+
+    // Alternate logic: if ANY main missed cut, alternate slots in
+    const anyMC = rows.some(r => r.isMC);
+    const altSlot = slots[3];
+    const altEsp  = hasESPN ? espnData[normName(altSlot.name)] : null;
+    altSlot.score    = altEsp ? altEsp.score : null;
+    altSlot.pos      = altEsp ? altEsp.pos   : '';
+    altSlot.isMC     = altEsp ? altEsp.missedCut : false;
+    altSlot.isActive = anyMC;
+
+    rows.push(altSlot);
+
+    // Total: main golfers (or replaced by alt if MC)
+    if (hasESPN) {
+      for (const r of rows.slice(0, 3)) {
+        if (!r.isMC) total += (r.score || 0);
+      }
+      if (anyMC) total += (altSlot.score || 0);
+    }
+
+    return { name: p.name, birdieGuess: p.birdieGuess, total, rows, hasESPN, anyMC };
+  });
+
+  // Sort: lowest total first (golf)
+  teams.sort((a, b) => a.total - b.total);
+
+  // Assign rank (handle ties)
+  let rank = 1;
+  for (let i = 0; i < teams.length; i++) {
+    if (i > 0 && teams[i].total !== teams[i-1].total) rank = i + 1;
+    teams[i].rank = rank;
+  }
+
+  container.innerHTML = teams.map(t => `
+    <div class="board-card">
+      <div class="board-card-header">
+        <span class="board-rank">${t.hasESPN ? rankStr(t.rank) : '—'}</span>
+        <span class="board-player-name">${esc(t.name)}</span>
+        <span class="board-total ${scoreClass(t.total)}">${t.hasESPN ? fmtScore(t.total) : '—'}</span>
+      </div>
+      <div class="board-golfers">
+        ${t.rows.map(r => golferRow(r, t.anyMC)).join('')}
+      </div>
+      <div class="birdie-row">Birdie guess: ${t.birdieGuess || '—'}</div>
+    </div>
+  `).join('');
+}
+
+function golferRow(r, anyMC) {
+  const isMainMC  = !r.isAlt && r.isMC;
+  const isAltOn   = r.isAlt && anyMC;
+  let badgeClass  = r.isAlt ? (isAltOn ? 'alt-active' : 'alt') : '';
+  let label       = r.label;
+  let extras      = '';
+
+  if (isMainMC)  extras += '<span class="mc-badge">MC</span> ';
+  if (isAltOn)   extras += '<span class="active-badge">ACTIVE ALT</span> ';
+
+  const scoreDisplay = r.score !== null ? fmtScore(r.score) : '—';
+  const sc = r.score !== null ? scoreClass(r.score) : '';
+
+  return `<div class="golfer-row">
+    <span class="tier-badge ${badgeClass}">${label}</span>
+    <span class="golfer-name">${esc(r.name)} ${extras}</span>
+    <span class="golfer-score ${sc}">${scoreDisplay}${r.pos ? ` <small style="font-weight:normal;color:#888">${esc(r.pos)}</small>` : ''}</span>
+  </div>`;
+}
+
+function fmtScore(n) {
+  if (n === 0) return 'E';
+  return n > 0 ? `+${n}` : `${n}`;
+}
+function scoreClass(n) {
+  if (n < 0) return 'under';
+  if (n > 0) return 'over';
+  return 'even';
+}
+function rankStr(r) {
+  return r === 1 ? '🏆 1st' : r === 2 ? '2nd' : r === 3 ? '3rd' : `${r}th`;
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Wizard ────────────────────────────────────────────────────────────────────
+function renderWizard() {
+  const locked = new Date() >= PICK_LOCK;
+  document.getElementById('locked-msg').style.display  = locked ? '' : 'none';
+  document.getElementById('wizard-body').style.display = locked ? 'none' : '';
+  if (locked) return;
+
+  // Build step dots
+  const steps = ['A', 'B', 'C', 'Alt', 'Submit'];
+  document.getElementById('step-dots').innerHTML = steps.map((s, i) =>
+    `<div class="step-dot ${i < currentStep ? 'done' : i === currentStep ? 'active' : ''}">${i < currentStep ? '✓' : i+1}</div>`
+  ).join('');
+
+  // Show current step panel
+  document.querySelectorAll('.step-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === currentStep);
+  });
+
+  // Build grids (once per tier)
+  buildGrid('A');
+  buildGrid('B');
+  buildGrid('C');
+  buildGrid('Alt');
+
+  if (currentStep === 4) renderSummary();
+}
+
+let gridsBuilt = {};
+function buildGrid(tier) {
+  if (gridsBuilt[tier]) return;
+  const gridEl = document.getElementById(`grid-${tier}`);
+  if (!gridEl) return;
+  const list = golfers.length ? golfers : EMBEDDED_GOLFERS;
+  const items = list.filter(g => g.tier === tier);
+  gridEl.innerHTML = items.map(g => `
+    <div class="golfer-card${selections[tier] === g.name ? ' selected' : ''}"
+         id="card-${tier}-${sanitizeId(g.name)}"
+         onclick="selectGolfer('${tier}', '${esc(g.name)}')">
+      <div class="check-icon">${selections[tier] === g.name ? '✓' : ''}</div>
+      <div class="golfer-card-inner">
+        <div class="golfer-card-name">${esc(g.name)}</div>
+        <div class="golfer-card-odds">${g.odds}</div>
+        <div class="golfer-card-rank">Rank #${g.rank}</div>
+      </div>
+    </div>
+  `).join('');
+  gridsBuilt[tier] = true;
+}
+
+function sanitizeId(name) {
+  return name.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function selectGolfer(tier, name) {
+  selections[tier] = name;
+  // Update all cards in this tier
+  const list = golfers.length ? golfers : EMBEDDED_GOLFERS;
+  list.filter(g => g.tier === tier).forEach(g => {
+    const el = document.getElementById(`card-${tier}-${sanitizeId(g.name)}`);
+    if (!el) return;
+    const selected = g.name === name;
+    el.classList.toggle('selected', selected);
+    el.querySelector('.check-icon').textContent = selected ? '✓' : '';
+  });
+}
+
+function filterAlts() {
+  const q = document.getElementById('alt-search').value.toLowerCase();
+  const list = golfers.length ? golfers : EMBEDDED_GOLFERS;
+  list.filter(g => g.tier === 'Alt').forEach(g => {
+    const el = document.getElementById(`card-Alt-${sanitizeId(g.name)}`);
+    if (!el) return;
+    el.style.display = g.name.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function nextStep(step) {
+  const tier = ['A','B','C','Alt'][step];
+  if (tier && !selections[tier]) {
+    showToast('Please select a golfer first', true);
+    return;
+  }
+  currentStep = step + 1;
+  renderWizard();
+  window.scrollTo(0, 0);
+}
+
+function prevStep(step) {
+  currentStep = step - 1;
+  renderWizard();
+  window.scrollTo(0, 0);
+}
+
+function renderSummary() {
+  const html = `
+    <h3>Your Team</h3>
+    <div class="summary-row"><span class="summary-label">Tier A</span><span>${esc(selections.A)}</span></div>
+    <div class="summary-row"><span class="summary-label">Tier B</span><span>${esc(selections.B)}</span></div>
+    <div class="summary-row"><span class="summary-label">Tier C</span><span>${esc(selections.C)}</span></div>
+    <div class="summary-row"><span class="summary-label">Alternate</span><span>${esc(selections.Alt)}</span></div>
+  `;
+  document.getElementById('pick-summary').innerHTML = html;
+}
+
+async function submitPicks() {
+  const name  = document.getElementById('player-name').value.trim();
+  const guess = document.getElementById('birdie-guess').value.trim();
+  if (!name) { showToast('Enter your name', true); return; }
+  if (new Date() >= PICK_LOCK) { showToast('Picks are locked!', true); return; }
+
+  const payload = {
+    action:      'submit',
+    name,
+    tierA:       selections.A,
+    tierB:       selections.B,
+    tierC:       selections.C,
+    alternate:   selections.Alt,
+    birdieGuess: guess,
+  };
+
+  try {
+    const r = await fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    const verb = d.status === 'updated' ? 'updated' : 'submitted';
+    showToast(`✅ Picks ${verb} for ${name}!`);
+    await loadPicks();
+    setTimeout(() => showTab('board'), 1800);
+  } catch (e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, error) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast show' + (error ? ' error' : '');
+  setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+// ── Embedded golfer fallback (used if Apps Script unreachable) ────────────────
+const EMBEDDED_GOLFERS = [
+  // Tier A
+  { rank:  1, name: 'Scottie Scheffler',          odds: '+350',    tier: 'A' },
+  { rank:  2, name: 'Rory McIlroy',               odds: '+700',    tier: 'A' },
+  { rank:  3, name: 'Bryson DeChambeau',           odds: '+1000',   tier: 'A' },
+  { rank:  4, name: 'Jon Rahm',                    odds: '+1200',   tier: 'A' },
+  { rank:  5, name: 'Ludvig Aberg',                odds: '+1600',   tier: 'A' },
+  { rank:  6, name: 'Xander Schauffele',           odds: '+1800',   tier: 'A' },
+  { rank:  7, name: 'Tommy Fleetwood',             odds: '+1800',   tier: 'A' },
+  { rank:  8, name: 'Collin Morikawa',             odds: '+2200',   tier: 'A' },
+  { rank:  9, name: 'Cameron Young',               odds: '+2700',   tier: 'A' },
+  { rank: 10, name: 'Patrick Reed',                odds: '+3000',   tier: 'A' },
+  // Tier B
+  { rank: 11, name: 'Matt Fitzpatrick',            odds: '+3000',   tier: 'B' },
+  { rank: 12, name: 'Justin Rose',                 odds: '+3000',   tier: 'B' },
+  { rank: 13, name: 'Chris Gotterup',              odds: '+3500',   tier: 'B' },
+  { rank: 14, name: 'Hideki Matsuyama',            odds: '+3500',   tier: 'B' },
+  { rank: 15, name: 'Viktor Hovland',              odds: '+3500',   tier: 'B' },
+  { rank: 16, name: 'Brooks Koepka',               odds: '+3800',   tier: 'B' },
+  { rank: 17, name: 'Justin Thomas',               odds: '+4000',   tier: 'B' },
+  { rank: 18, name: 'Robert MacIntyre',            odds: '+4000',   tier: 'B' },
+  { rank: 19, name: 'Jordan Spieth',               odds: '+4000',   tier: 'B' },
+  { rank: 20, name: 'Tyrrell Hatton',              odds: '+4000',   tier: 'B' },
+  // Tier C
+  { rank: 21, name: 'Shane Lowry',                 odds: '+4500',   tier: 'C' },
+  { rank: 22, name: 'Patrick Cantlay',             odds: '+5000',   tier: 'C' },
+  { rank: 23, name: 'Joaquin Niemann',             odds: '+5000',   tier: 'C' },
+  { rank: 24, name: 'Ben Griffin',                 odds: '+5500',   tier: 'C' },
+  { rank: 25, name: 'Si Woo Kim',                  odds: '+6000',   tier: 'C' },
+  { rank: 26, name: 'Jake Knapp',                  odds: '+6000',   tier: 'C' },
+  { rank: 27, name: 'Corey Conners',               odds: '+6000',   tier: 'C' },
+  { rank: 28, name: 'Akshay Bhatia',               odds: '+6000',   tier: 'C' },
+  { rank: 29, name: 'Russell Henley',              odds: '+6600',   tier: 'C' },
+  { rank: 30, name: 'Min Woo Lee',                 odds: '+6600',   tier: 'C' },
+  // Alternate (31-101)
+  { rank: 31, name: 'Max Homa',                    odds: '+6600',   tier: 'Alt' },
+  { rank: 32, name: 'Jason Day',                   odds: '+6600',   tier: 'Alt' },
+  { rank: 33, name: 'Cameron Smith',               odds: '+6600',   tier: 'Alt' },
+  { rank: 34, name: 'Adam Scott',                  odds: '+6600',   tier: 'Alt' },
+  { rank: 35, name: 'Sepp Straka',                 odds: '+7000',   tier: 'Alt' },
+  { rank: 36, name: 'Sam Burns',                   odds: '+7000',   tier: 'Alt' },
+  { rank: 37, name: 'Daniel Berger',               odds: '+7000',   tier: 'Alt' },
+  { rank: 38, name: 'Sung-Jae Im',                 odds: '+8000',   tier: 'Alt' },
+  { rank: 39, name: 'Sahith Theegala',             odds: '+8000',   tier: 'Alt' },
+  { rank: 40, name: 'Gary Woodland',               odds: '+8000',   tier: 'Alt' },
+  { rank: 41, name: 'Marco Penge',                 odds: '+8000',   tier: 'Alt' },
+  { rank: 42, name: 'Wyndham Clark',               odds: '+8000',   tier: 'Alt' },
+  { rank: 43, name: 'Will Zalatoris',              odds: '+8000',   tier: 'Alt' },
+  { rank: 44, name: 'Nicolai Hojgaard',            odds: '+9000',   tier: 'Alt' },
+  { rank: 45, name: 'Jacob Bridgeman',             odds: '+9000',   tier: 'Alt' },
+  { rank: 46, name: 'J.J. Spaun',                  odds: '+9000',   tier: 'Alt' },
+  { rank: 47, name: 'Harris English',              odds: '+9000',   tier: 'Alt' },
+  { rank: 48, name: 'Dustin Johnson',              odds: '+9000',   tier: 'Alt' },
+  { rank: 49, name: 'Sergio Garcia',               odds: '+10000',  tier: 'Alt' },
+  { rank: 50, name: 'Matt McCarty',                odds: '+10000',  tier: 'Alt' },
+  { rank: 51, name: 'Alex Noren',                  odds: '+10000',  tier: 'Alt' },
+  { rank: 52, name: 'Tony Finau',                  odds: '+10000',  tier: 'Alt' },
+  { rank: 53, name: 'Maverick McNealy',            odds: '+11000',  tier: 'Alt' },
+  { rank: 54, name: 'Ryan Gerard',                 odds: '+11000',  tier: 'Alt' },
+  { rank: 55, name: 'Ryan Fox',                    odds: '+12000',  tier: 'Alt' },
+  { rank: 56, name: 'Kurt Kitayama',               odds: '+12000',  tier: 'Alt' },
+  { rank: 57, name: 'Keegan Bradley',              odds: '+12000',  tier: 'Alt' },
+  { rank: 58, name: 'Harry Hall',                  odds: '+13000',  tier: 'Alt' },
+  { rank: 59, name: 'Aaron Rai',                   odds: '+13000',  tier: 'Alt' },
+  { rank: 60, name: 'Pierceson Coody',             odds: '+13000',  tier: 'Alt' },
+  { rank: 61, name: 'John Keefer',                 odds: '+13000',  tier: 'Alt' },
+  { rank: 62, name: 'Rasmus Neergaard-Petersen',   odds: '+13000',  tier: 'Alt' },
+  { rank: 63, name: 'Davis Thompson',              odds: '+14000',  tier: 'Alt' },
+  { rank: 64, name: 'Tom McKibbin',                odds: '+14000',  tier: 'Alt' },
+  { rank: 65, name: 'Taylor Pendrith',             odds: '+15000',  tier: 'Alt' },
+  { rank: 66, name: 'Tiger Woods',                 odds: '+15000',  tier: 'Alt' },
+  { rank: 67, name: 'Rasmus Hojgaard',             odds: '+15000',  tier: 'Alt' },
+  { rank: 68, name: 'Carlos Ortiz',                odds: '+15000',  tier: 'Alt' },
+  { rank: 69, name: 'Brian Harman',                odds: '+15000',  tier: 'Alt' },
+  { rank: 70, name: 'Sam Stevens',                 odds: '+15000',  tier: 'Alt' },
+  { rank: 71, name: 'Phil Mickelson',              odds: '+20000',  tier: 'Alt' },
+  { rank: 72, name: 'Michael Kim',                 odds: '+20000',  tier: 'Alt' },
+  { rank: 73, name: 'Casey Jarvis',                odds: '+20000',  tier: 'Alt' },
+  { rank: 74, name: 'Nico Echavarria',             odds: '+20000',  tier: 'Alt' },
+  { rank: 75, name: 'Andrew Novak',                odds: '+20000',  tier: 'Alt' },
+  { rank: 76, name: 'Aldrich Potgieter',           odds: '+20000',  tier: 'Alt' },
+  { rank: 77, name: 'Jayden Schaper',              odds: '+20000',  tier: 'Alt' },
+  { rank: 78, name: 'Nick Taylor',                 odds: '+25000',  tier: 'Alt' },
+  { rank: 79, name: 'Max Greyserman',              odds: '+25000',  tier: 'Alt' },
+  { rank: 80, name: 'Haotong Li',                  odds: '+25000',  tier: 'Alt' },
+  { rank: 81, name: 'Bubba Watson',                odds: '+25000',  tier: 'Alt' },
+  { rank: 82, name: 'Sami Valimaki',               odds: '+30000',  tier: 'Alt' },
+  { rank: 83, name: 'Davis Riley',                 odds: '+30000',  tier: 'Alt' },
+  { rank: 84, name: 'Kristoffer Reitan',           odds: '+30000',  tier: 'Alt' },
+  { rank: 85, name: 'Charl Schwartzel',            odds: '+35000',  tier: 'Alt' },
+  { rank: 86, name: 'Brian Campbell',              odds: '+40000',  tier: 'Alt' },
+  { rank: 87, name: 'Michael Brennan',             odds: '+40000',  tier: 'Alt' },
+  { rank: 88, name: 'Zach Johnson',                odds: '+40000',  tier: 'Alt' },
+  { rank: 89, name: 'Danny Willett',               odds: '+50000',  tier: 'Alt' },
+  { rank: 90, name: 'Angel Cabrera',               odds: '+50000',  tier: 'Alt' },
+  { rank: 91, name: 'Vijay Singh',                 odds: '+100000', tier: 'Alt' },
+  { rank: 92, name: 'Mike Weir',                   odds: '+100000', tier: 'Alt' },
+  { rank: 93, name: 'Fred Couples',                odds: '+100000', tier: 'Alt' },
+  { rank: 94, name: 'Brandon Holtz',               odds: '+200000', tier: 'Alt' },
+  { rank: 95, name: 'Mason Howell',                odds: '+200000', tier: 'Alt' },
+  { rank: 96, name: 'Jose Maria Olazabal',         odds: '+200000', tier: 'Alt' },
+  { rank: 97, name: 'Mateo Pulcini',               odds: '+200000', tier: 'Alt' },
+  { rank: 98, name: 'Jackson Herrington',          odds: '+200000', tier: 'Alt' },
+  { rank: 99, name: 'Ethan Fang',                  odds: '+200000', tier: 'Alt' },
+  { rank:100, name: 'Pongsapak Laopakdee',         odds: '+200000', tier: 'Alt' },
+  { rank:101, name: 'Naoyuki Kataoka',             odds: '+200000', tier: 'Alt' },
+];
+</script>
+</body>
+</html>
