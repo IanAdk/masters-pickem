@@ -437,6 +437,113 @@
   }
 
   /* ── Admin ── */
+  /* ── Paper Picks ── */
+  #paper-panel { display: none; }
+  .paper-intro {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .paper-intro p { font-size: .88rem; color: var(--gray); max-width: 520px; }
+  .btn-download {
+    background: var(--gold);
+    color: var(--dkgreen);
+    border: none;
+    padding: 11px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: .95rem;
+    font-family: inherit;
+    font-weight: bold;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-download:hover { background: var(--dkgold); }
+  .paper-preview {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 28px 32px;
+    font-family: Georgia, serif;
+  }
+  .paper-preview h2 {
+    text-align: center;
+    color: var(--green);
+    font-size: 1.4rem;
+    letter-spacing: .04em;
+    margin-bottom: 2px;
+  }
+  .paper-preview .paper-sub {
+    text-align: center;
+    font-size: .82rem;
+    color: var(--gray);
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+  .paper-tiers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .paper-tier {
+    border: 1.5px solid #c8c0b0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .paper-tier-header {
+    background: var(--green);
+    color: white;
+    padding: 7px 12px;
+    font-size: .82rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+  }
+  .paper-tier-header span { color: var(--gold); }
+  .paper-golfer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    border-bottom: 1px solid #ede9e2;
+    font-size: .8rem;
+  }
+  .paper-golfer-row:last-child { border-bottom: none; }
+  .paper-circle {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid #888;
+    flex-shrink: 0;
+  }
+  .paper-golfer-name { flex: 1; }
+  .paper-golfer-odds { color: var(--gray); font-size: .72rem; }
+  .paper-footer {
+    border: 1.5px solid #c8c0b0;
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .paper-field label {
+    display: block;
+    font-size: .75rem;
+    font-weight: bold;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+  .paper-field .paper-line {
+    border-bottom: 1.5px solid #555;
+    height: 24px;
+  }
+
   #admin-panel { display: none; }
   #admin-gate {
     display: flex;
@@ -530,6 +637,7 @@
 <nav>
   <button id="tab-board" onclick="showTab('board')">Leaderboard</button>
   <button id="tab-pick"  onclick="showTab('pick')">My Picks</button>
+  <button id="tab-paper" onclick="showTab('paper')">Paper Picks</button>
   <button id="tab-admin" onclick="showTab('admin')">Admin</button>
 </nav>
 
@@ -633,6 +741,17 @@
     </div>
   </div>
 
+  <!-- ── Paper Picks ── -->
+  <div id="paper-panel">
+    <div class="paper-intro">
+      <p>Download a printable picks sheet — circle your golfer from each tier, fill in your name and birdie guess, then submit online.</p>
+      <button class="btn-download" onclick="downloadPaperPicks()">⬇ Download PDF Sheet</button>
+    </div>
+    <div class="paper-preview" id="paper-preview">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
   <!-- ── Admin ── -->
   <div id="admin-panel">
 
@@ -727,13 +846,16 @@ function updateLockBadge() {
 
 // ── Tabs ─────────────────────────────────────────────────────────────────────
 function showTab(tab) {
-  document.getElementById('scoreboard').style.display  = tab === 'board' ? 'block' : 'none';
-  document.getElementById('picker').style.display      = tab === 'pick'  ? 'block' : 'none';
-  document.getElementById('admin-panel').style.display = tab === 'admin' ? 'block' : 'none';
+  document.getElementById('scoreboard').style.display   = tab === 'board' ? 'block' : 'none';
+  document.getElementById('picker').style.display       = tab === 'pick'  ? 'block' : 'none';
+  document.getElementById('paper-panel').style.display  = tab === 'paper' ? 'block' : 'none';
+  document.getElementById('admin-panel').style.display  = tab === 'admin' ? 'block' : 'none';
   document.getElementById('tab-board').classList.toggle('active', tab === 'board');
   document.getElementById('tab-pick').classList.toggle('active',  tab === 'pick');
+  document.getElementById('tab-paper').classList.toggle('active', tab === 'paper');
   document.getElementById('tab-admin').classList.toggle('active', tab === 'admin');
   if (tab === 'pick')  renderWizard();
+  if (tab === 'paper') renderPaperPreview();
   if (tab === 'admin') loadAdminConfig();
 }
 
@@ -1202,6 +1324,150 @@ const EMBEDDED_GOLFERS = [
   { rank:100, name: 'Pongsapak Laopakdee',         odds: '+200000', tier: 'Alt' },
   { rank:101, name: 'Naoyuki Kataoka',             odds: '+200000', tier: 'Alt' },
 ];
+
+// ── Paper Picks ──────────────────────────────────────────────────────────────
+function renderPaperPreview() {
+  document.getElementById('paper-preview').innerHTML = buildPaperHTML(true);
+}
+
+function buildPaperHTML(previewMode) {
+  const list   = golfers.length ? golfers : EMBEDDED_GOLFERS;
+  const tiers  = [
+    { key: 'A',   label: 'Tier A', sub: 'Ranks 1–10 · Pick one' },
+    { key: 'B',   label: 'Tier B', sub: 'Ranks 11–20 · Pick one' },
+    { key: 'C',   label: 'Tier C', sub: 'Ranks 21–30 · Pick one' },
+    { key: 'Alt', label: 'Alternate', sub: 'Ranks 31–101 · Slots in if a main misses cut' },
+  ];
+
+  const tierHTML = tiers.map(t => {
+    const golferRows = list
+      .filter(g => g.tier === t.key)
+      .map(g => `
+        <div class="paper-golfer-row">
+          <div class="paper-circle"></div>
+          <div class="paper-golfer-name">${g.name}</div>
+          <div class="paper-golfer-odds">${g.odds}</div>
+        </div>`).join('');
+
+    // Alternate tier spans both columns
+    const span = t.key === 'Alt' ? ' style="grid-column:1/-1"' : '';
+    return `
+      <div class="paper-tier"${span}>
+        <div class="paper-tier-header">
+          ${t.label} <span>${t.sub}</span>
+        </div>
+        ${golferRows}
+      </div>`;
+  }).join('');
+
+  return `
+    <h2>⛳ Masters Pick'em 2026</h2>
+    <div class="paper-sub">Augusta National · April 9–12, 2026 · Picks lock April 9 at 6:00 AM ET</div>
+    <div class="paper-tiers">${tierHTML}</div>
+    <div class="paper-footer">
+      <div class="paper-field">
+        <label>Your Name</label>
+        <div class="paper-line"></div>
+      </div>
+      <div class="paper-field">
+        <label>Birdie Guess (tiebreaker — total birdies for the whole tournament)</label>
+        <div class="paper-line"></div>
+      </div>
+    </div>`;
+}
+
+function downloadPaperPicks() {
+  const list = golfers.length ? golfers : EMBEDDED_GOLFERS;
+  const tiers = [
+    { key: 'A',   label: 'Tier A',    sub: 'Ranks 1–10 · Pick one' },
+    { key: 'B',   label: 'Tier B',    sub: 'Ranks 11–20 · Pick one' },
+    { key: 'C',   label: 'Tier C',    sub: 'Ranks 21–30 · Pick one' },
+    { key: 'Alt', label: 'Alternate', sub: 'Ranks 31–101 · Slots in if a main misses cut' },
+  ];
+
+  const tierBlocks = tiers.map(t => {
+    const rows = list.filter(g => g.tier === t.key).map(g => `
+      <tr>
+        <td class="circle-cell"><div class="circle"></div></td>
+        <td class="name-cell">${g.name}</td>
+        <td class="odds-cell">${g.odds}</td>
+      </tr>`).join('');
+
+    const cols = t.key === 'Alt' ? 'colspan="2"' : '';
+    return `
+      <div class="tier-block${t.key === 'Alt' ? ' alt-block' : ''}">
+        <div class="tier-header">
+          <span class="tier-label">${t.label}</span>
+          <span class="tier-sub">${t.sub}</span>
+        </div>
+        <table>${rows}</table>
+      </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Masters Pick'em 2026 — Picks Sheet</title>
+<style>
+  @page { size: letter; margin: 0.6in; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, serif; color: #1a1a1a; background: white; }
+  h1 { text-align: center; color: #006747; font-size: 1.6rem; letter-spacing: .04em; margin-bottom: 3px; }
+  .sub { text-align: center; font-size: .78rem; color: #888; font-style: italic; margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .tier-block { border: 1.5px solid #b0a898; border-radius: 5px; overflow: hidden; break-inside: avoid; }
+  .alt-block { grid-column: 1 / -1; }
+  .tier-header {
+    background: #006747; color: white;
+    padding: 6px 10px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .tier-label { font-weight: bold; font-size: .85rem; }
+  .tier-sub { font-size: .7rem; color: #FFBE00; }
+  table { width: 100%; border-collapse: collapse; }
+  tr:nth-child(even) { background: #f8f5f0; }
+  .circle-cell { width: 28px; padding: 4px 8px; }
+  .circle { width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid #666; }
+  .name-cell { font-size: .79rem; padding: 4px 4px; }
+  .odds-cell { font-size: .72rem; color: #888; padding: 4px 8px; text-align: right; white-space: nowrap; }
+  .footer {
+    border: 1.5px solid #b0a898; border-radius: 5px;
+    padding: 14px 16px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    break-inside: avoid;
+  }
+  .field label { display: block; font-size: .72rem; font-weight: bold; color: #006747; margin-bottom: 6px; }
+  .field .line { border-bottom: 1.5px solid #333; height: 22px; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+  <h1>⛳ Masters Pick'em 2026</h1>
+  <div class="sub">Augusta National &nbsp;·&nbsp; April 9–12, 2026 &nbsp;·&nbsp; Picks lock April 9 at 6:00 AM ET</div>
+  <div class="grid">${tierBlocks}</div>
+  <div class="footer">
+    <div class="field">
+      <label>Your Name</label>
+      <div class="line"></div>
+    </div>
+    <div class="field">
+      <label>Birdie Guess — closest to total tournament birdies wins ties</label>
+      <div class="line"></div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'masters-pickems-2026.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 // ── Admin ────────────────────────────────────────────────────────────────────
 const ADMIN_PASSWORD = 'Analysis';
