@@ -436,6 +436,25 @@
     font-size: .82rem;
   }
 
+  /* ── Admin ── */
+  #admin-panel { display: none; }
+  #admin-gate {
+    display: flex;
+    justify-content: center;
+    padding: 48px 16px;
+  }
+  .admin-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+    border: 1px solid #e8e4dc;
+    width: 100%;
+    max-width: 480px;
+  }
+  .admin-card-title { font-weight: bold; color: var(--green); margin-bottom: 6px; }
+  .admin-card-sub   { font-size: .83rem; color: var(--gray); margin-bottom: 4px; }
+
   @media (max-width: 600px) {
     .header-inner { flex-direction: column; gap: 8px; align-items: flex-start; }
     .golfer-grid { grid-template-columns: 1fr 1fr; }
@@ -511,6 +530,7 @@
 <nav>
   <button id="tab-board" onclick="showTab('board')">Leaderboard</button>
   <button id="tab-pick"  onclick="showTab('pick')">My Picks</button>
+  <button id="tab-admin" onclick="showTab('admin')">Admin</button>
 </nav>
 
 <main>
@@ -613,6 +633,50 @@
     </div>
   </div>
 
+  <!-- ── Admin ── -->
+  <div id="admin-panel">
+
+    <!-- Password gate -->
+    <div id="admin-gate">
+      <div class="admin-card">
+        <div style="font-size:1.4rem;margin-bottom:12px">🔐</div>
+        <div style="font-weight:bold;color:var(--green);margin-bottom:14px;font-size:1rem">Admin Access</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <input id="admin-pw" type="password" placeholder="Password" style="text-align:center"
+                 onkeydown="if(event.key==='Enter')unlockAdmin()">
+        </div>
+        <button class="btn-next" style="width:100%" onclick="unlockAdmin()">Unlock</button>
+      </div>
+    </div>
+
+    <!-- Admin controls (shown after unlock) -->
+    <div id="admin-controls" style="display:none">
+      <h2 style="color:var(--green);font-size:1.15rem;margin-bottom:20px">Admin Panel</h2>
+
+      <!-- Tiebreaker -->
+      <div class="admin-card" style="margin-bottom:16px">
+        <div class="admin-card-title">🐦 Set Tiebreaker — Actual Total Birdies</div>
+        <div class="admin-card-sub">Enter the official total birdies made during the tournament. Closest guess wins ties.</div>
+        <div id="current-birdies" style="margin:10px 0;font-size:.85rem;color:var(--gray);font-style:italic">Loading…</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="birdie-actual" type="number" min="0" max="9999" placeholder="e.g. 284"
+                 style="flex:1;padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:.95rem;font-family:inherit">
+          <button class="btn-next" onclick="saveBirdies()">Save</button>
+        </div>
+      </div>
+
+      <!-- Reset picks -->
+      <div class="admin-card" style="border-color:#ffcccc">
+        <div class="admin-card-title" style="color:var(--cut)">⚠️ Reset All Picks</div>
+        <div class="admin-card-sub">Permanently deletes every submitted pick. This cannot be undone.</div>
+        <div style="margin-top:14px">
+          <button class="btn-back" style="border-color:var(--cut);color:var(--cut)" onclick="confirmReset()">Delete All Picks</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </main>
 
 <div class="toast" id="toast"></div>
@@ -663,11 +727,14 @@ function updateLockBadge() {
 
 // ── Tabs ─────────────────────────────────────────────────────────────────────
 function showTab(tab) {
-  document.getElementById('scoreboard').style.display = tab === 'board' ? 'block' : 'none';
-  document.getElementById('picker').style.display     = tab === 'pick'  ? 'block' : 'none';
+  document.getElementById('scoreboard').style.display  = tab === 'board' ? 'block' : 'none';
+  document.getElementById('picker').style.display      = tab === 'pick'  ? 'block' : 'none';
+  document.getElementById('admin-panel').style.display = tab === 'admin' ? 'block' : 'none';
   document.getElementById('tab-board').classList.toggle('active', tab === 'board');
   document.getElementById('tab-pick').classList.toggle('active',  tab === 'pick');
-  if (tab === 'pick') renderWizard();
+  document.getElementById('tab-admin').classList.toggle('active', tab === 'admin');
+  if (tab === 'pick')  renderWizard();
+  if (tab === 'admin') loadAdminConfig();
 }
 
 // ── Data loading ─────────────────────────────────────────────────────────────
@@ -1135,6 +1202,68 @@ const EMBEDDED_GOLFERS = [
   { rank:100, name: 'Pongsapak Laopakdee',         odds: '+200000', tier: 'Alt' },
   { rank:101, name: 'Naoyuki Kataoka',             odds: '+200000', tier: 'Alt' },
 ];
+
+// ── Admin ────────────────────────────────────────────────────────────────────
+const ADMIN_PASSWORD = 'Analysis';
+let adminUnlocked = false;
+
+function unlockAdmin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw !== ADMIN_PASSWORD) { showToast('Incorrect password', true); return; }
+  adminUnlocked = true;
+  document.getElementById('admin-gate').style.display     = 'none';
+  document.getElementById('admin-controls').style.display = 'block';
+  loadAdminConfig();
+}
+
+async function loadAdminConfig() {
+  if (!adminUnlocked) return;
+  try {
+    const r = await fetch(`${APPS_SCRIPT_URL}?action=config`);
+    const d = await r.json();
+    const el = document.getElementById('current-birdies');
+    if (d.actualBirdies !== null && d.actualBirdies !== undefined) {
+      el.textContent = `Currently set to: ${d.actualBirdies} birdies`;
+      el.style.color = 'var(--green)';
+      document.getElementById('birdie-actual').value = d.actualBirdies;
+    } else {
+      el.textContent = 'Not yet set';
+    }
+  } catch { /* silent — Apps Script URL may not be configured */ }
+}
+
+async function saveBirdies() {
+  const val = document.getElementById('birdie-actual').value.trim();
+  if (!val) { showToast('Enter a birdie count', true); return; }
+  try {
+    const r = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'updateBirdies', birdies: Number(val), adminKey: ADMIN_PASSWORD }),
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    showToast(`✅ Tiebreaker set to ${val} birdies`);
+    document.getElementById('current-birdies').textContent = `Currently set to: ${val} birdies`;
+    document.getElementById('current-birdies').style.color = 'var(--green)';
+  } catch (e) { showToast('Error: ' + e.message, true); }
+}
+
+async function confirmReset() {
+  if (!confirm('Delete ALL picks? This cannot be undone.')) return;
+  try {
+    const r = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resetPicks', adminKey: ADMIN_PASSWORD }),
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    picks = [];
+    showToast(`✅ All picks deleted (${d.deleted} removed)`);
+    renderBoard();
+  } catch (e) { showToast('Error: ' + e.message, true); }
+}
 
 // ── Azalea strip ─────────────────────────────────────────────────────────────
 (function() {

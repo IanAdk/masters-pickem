@@ -18,6 +18,7 @@ function doGet(e) {
   try {
     if (action === 'golfers') return respond(getGolfers());
     if (action === 'picks')   return respond(getPicks());
+    if (action === 'config')  return respond(getConfig());
     return respond({ error: 'Unknown action' }, 400);
   } catch (err) {
     return respond({ error: err.message }, 500);
@@ -29,8 +30,9 @@ function doPost(e) {
   try {
     const payload = JSON.parse(e.postData.contents);
     const action  = payload.action || '';
-    if (action === 'submit')          return respond(submitPick(payload));
-    if (action === 'updateBirdies')   return respond(updateBirdies(payload));
+    if (action === 'submit')        return respond(submitPick(payload));
+    if (action === 'updateBirdies') return respond(updateBirdies(payload));
+    if (action === 'resetPicks')    return respond(resetPicks(payload));
     return respond({ error: 'Unknown action' }, 400);
   } catch (err) {
     return respond({ error: err.message }, 500);
@@ -116,7 +118,22 @@ function getActualBirdies() {
 
 // Store admin key in Script Properties (set manually via Apps Script UI → Project Settings)
 function getAdminKey_() {
-  return PropertiesService.getScriptProperties().getProperty('ADMIN_KEY') || 'masters2026';
+  return PropertiesService.getScriptProperties().getProperty('ADMIN_KEY') || 'Analysis';
+}
+
+function getConfig() {
+  const prop    = PropertiesService.getScriptProperties();
+  const birdies = prop.getProperty('ACTUAL_BIRDIES');
+  return { actualBirdies: birdies ? Number(birdies) : null };
+}
+
+function resetPicks(payload) {
+  if ((payload.adminKey || '') !== getAdminKey_()) throw new Error('Unauthorized');
+  const ss    = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(PICKS_SHEET);
+  const last  = sheet.getLastRow();
+  if (last > 1) sheet.deleteRows(2, last - 1);
+  return { status: 'ok', deleted: last - 1 };
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
