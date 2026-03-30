@@ -663,8 +663,8 @@ function updateLockBadge() {
 
 // ── Tabs ─────────────────────────────────────────────────────────────────────
 function showTab(tab) {
-  document.getElementById('scoreboard').style.display = tab === 'board' ? '' : 'none';
-  document.getElementById('picker').style.display     = tab === 'pick'  ? '' : 'none';
+  document.getElementById('scoreboard').style.display = tab === 'board' ? 'block' : 'none';
+  document.getElementById('picker').style.display     = tab === 'pick'  ? 'block' : 'none';
   document.getElementById('tab-board').classList.toggle('active', tab === 'board');
   document.getElementById('tab-pick').classList.toggle('active',  tab === 'pick');
   if (tab === 'pick') renderWizard();
@@ -885,8 +885,8 @@ function esc(s) {
 // ── Wizard ────────────────────────────────────────────────────────────────────
 function renderWizard() {
   const locked = new Date() >= PICK_LOCK;
-  document.getElementById('locked-msg').style.display  = locked ? '' : 'none';
-  document.getElementById('wizard-body').style.display = locked ? 'none' : '';
+  document.getElementById('locked-msg').style.display  = locked ? 'block' : 'none';
+  document.getElementById('wizard-body').style.display = locked ? 'none'  : 'block';
   if (locked) return;
 
   // Build step dots
