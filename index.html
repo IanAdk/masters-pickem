@@ -721,12 +721,16 @@ async function loadESPN() {
     for (const c of comp.competitors || []) {
       const name = c.athlete && c.athlete.displayName;
       if (!name) continue;
-      const scoreStr = c.score || '0';
-      const score    = parseScore(scoreStr);
-      const status   = c.status && c.status.type && c.status.type.name;
-      const pos      = c.status && c.status.displayValue;
-      const missed   = status === 'STATUS_MISSED_CUT' || (pos && pos.toUpperCase().includes('MC'));
-      espnData[normName(name)] = { score, missedCut: missed, pos: pos || '', raw: scoreStr };
+      // status.detail gives relative-to-par string e.g. "-21(F)", "+3", "E"
+      const detail   = (c.status && c.status.detail) || c.score || '0';
+      const score    = parseScore(detail);
+      const dispVal  = (c.status && c.status.displayValue) || '';
+      const typeName = (c.status && c.status.type && c.status.type.name) || '';
+      const missed   = dispVal.toUpperCase() === 'CUT'
+                    || typeName === 'STATUS_MISSED_CUT'
+                    || dispVal.toUpperCase().includes('MC');
+      const pos      = c.status && c.status.position && c.status.position.displayText || dispVal;
+      espnData[normName(name)] = { score, missedCut: missed, pos: pos || '', raw: detail };
     }
     const live = event.status && event.status.type && event.status.type.name === 'STATUS_IN_PROGRESS';
     statusEl.textContent = live
@@ -740,8 +744,11 @@ async function loadESPN() {
 }
 
 function parseScore(s) {
-  if (!s || s === 'E' || s === 'EVEN') return 0;
-  const n = parseInt(s, 10);
+  if (!s) return 0;
+  // Strip round suffix like "(F)", "(R2)", "(CUT)" → "-21(F)" → "-21"
+  const clean = String(s).replace(/\(.*\)/, '').trim();
+  if (!clean || clean === 'E' || clean === 'EVEN' || clean === '--') return 0;
+  const n = parseInt(clean, 10);
   return isNaN(n) ? 0 : n;
 }
 
