@@ -1072,7 +1072,7 @@ async function submitPicks() {
   try {
     const r = await fetch(APPS_SCRIPT_URL, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body:    JSON.stringify(payload),
     });
     const d = await r.json();
@@ -1238,7 +1238,7 @@ async function saveBirdies() {
   try {
     const r = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'updateBirdies', birdies: Number(val), adminKey: ADMIN_PASSWORD }),
     });
     const d = await r.json();
@@ -1254,7 +1254,7 @@ async function confirmReset() {
   try {
     const r = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'resetPicks', adminKey: ADMIN_PASSWORD }),
     });
     const d = await r.json();
