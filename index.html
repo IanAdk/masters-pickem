@@ -712,7 +712,7 @@
       <!-- Step 4: Alternate -->
       <div class="step-panel" id="step-3">
         <div class="step-title">Step 4 of 5 — Alternate Golfer</div>
-        <div class="tier-label">ALTERNATE · Ranks 31–101 · Slots in if a main misses cut</div>
+        <div class="tier-label">ALTERNATE · Ranks 31–91 · Slots in if a main misses cut</div>
         <input id="alt-search" type="text" placeholder="Search golfer name…" oninput="filterAlts()">
         <div class="golfer-grid" id="grid-Alt"></div>
         <div class="wizard-actions">
@@ -806,7 +806,7 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGnhAwJouWxqkQy5G4TxAS3OQS72neOMGzWsSeXisXu3JbAknQb9Nzqzt9RBerSXYm/exec';
 
 // Pick lock: April 9, 2026 at 6:00 AM Eastern Time
-const PICK_LOCK = new Date('2026-04-09T06:00:00-04:00');
+const PICK_LOCK = new Date('2026-04-09T07:30:00-04:00');
 
 // ESPN API — event ID for The Masters 2026 (update once known)
 let ESPN_EVENT_ID = localStorage.getItem('mastersEventId') || '401811939';
@@ -1218,111 +1218,101 @@ function showToast(msg, error) {
 
 // ── Embedded golfer fallback (used if Apps Script unreachable) ────────────────
 const EMBEDDED_GOLFERS = [
-  // Tier A
-  { rank:  1, name: 'Scottie Scheffler',          odds: '+350',    tier: 'A' },
-  { rank:  2, name: 'Rory McIlroy',               odds: '+700',    tier: 'A' },
-  { rank:  3, name: 'Bryson DeChambeau',           odds: '+1000',   tier: 'A' },
-  { rank:  4, name: 'Jon Rahm',                    odds: '+1200',   tier: 'A' },
-  { rank:  5, name: 'Ludvig Aberg',                odds: '+1600',   tier: 'A' },
-  { rank:  6, name: 'Xander Schauffele',           odds: '+1800',   tier: 'A' },
-  { rank:  7, name: 'Tommy Fleetwood',             odds: '+1800',   tier: 'A' },
-  { rank:  8, name: 'Collin Morikawa',             odds: '+2200',   tier: 'A' },
-  { rank:  9, name: 'Cameron Young',               odds: '+2700',   tier: 'A' },
-  { rank: 10, name: 'Patrick Reed',                odds: '+3000',   tier: 'A' },
-  // Tier B
-  { rank: 11, name: 'Matt Fitzpatrick',            odds: '+3000',   tier: 'B' },
-  { rank: 12, name: 'Justin Rose',                 odds: '+3000',   tier: 'B' },
-  { rank: 13, name: 'Chris Gotterup',              odds: '+3500',   tier: 'B' },
-  { rank: 14, name: 'Hideki Matsuyama',            odds: '+3500',   tier: 'B' },
-  { rank: 15, name: 'Viktor Hovland',              odds: '+3500',   tier: 'B' },
-  { rank: 16, name: 'Brooks Koepka',               odds: '+3800',   tier: 'B' },
-  { rank: 17, name: 'Justin Thomas',               odds: '+4000',   tier: 'B' },
-  { rank: 18, name: 'Robert MacIntyre',            odds: '+4000',   tier: 'B' },
-  { rank: 19, name: 'Jordan Spieth',               odds: '+4000',   tier: 'B' },
-  { rank: 20, name: 'Tyrrell Hatton',              odds: '+4000',   tier: 'B' },
-  // Tier C
-  { rank: 21, name: 'Shane Lowry',                 odds: '+4500',   tier: 'C' },
-  { rank: 22, name: 'Patrick Cantlay',             odds: '+5000',   tier: 'C' },
-  { rank: 23, name: 'Joaquin Niemann',             odds: '+5000',   tier: 'C' },
-  { rank: 24, name: 'Ben Griffin',                 odds: '+5500',   tier: 'C' },
-  { rank: 25, name: 'Si Woo Kim',                  odds: '+6000',   tier: 'C' },
-  { rank: 26, name: 'Jake Knapp',                  odds: '+6000',   tier: 'C' },
-  { rank: 27, name: 'Corey Conners',               odds: '+6000',   tier: 'C' },
-  { rank: 28, name: 'Akshay Bhatia',               odds: '+6000',   tier: 'C' },
-  { rank: 29, name: 'Russell Henley',              odds: '+6600',   tier: 'C' },
-  { rank: 30, name: 'Min Woo Lee',                 odds: '+6600',   tier: 'C' },
-  // Alternate (31-101)
-  { rank: 31, name: 'Max Homa',                    odds: '+6600',   tier: 'Alt' },
-  { rank: 32, name: 'Jason Day',                   odds: '+6600',   tier: 'Alt' },
-  { rank: 33, name: 'Cameron Smith',               odds: '+6600',   tier: 'Alt' },
-  { rank: 34, name: 'Adam Scott',                  odds: '+6600',   tier: 'Alt' },
-  { rank: 35, name: 'Sepp Straka',                 odds: '+7000',   tier: 'Alt' },
-  { rank: 36, name: 'Sam Burns',                   odds: '+7000',   tier: 'Alt' },
-  { rank: 37, name: 'Daniel Berger',               odds: '+7000',   tier: 'Alt' },
-  { rank: 38, name: 'Sung-Jae Im',                 odds: '+8000',   tier: 'Alt' },
-  { rank: 39, name: 'Sahith Theegala',             odds: '+8000',   tier: 'Alt' },
-  { rank: 40, name: 'Gary Woodland',               odds: '+8000',   tier: 'Alt' },
-  { rank: 41, name: 'Marco Penge',                 odds: '+8000',   tier: 'Alt' },
-  { rank: 42, name: 'Wyndham Clark',               odds: '+8000',   tier: 'Alt' },
-  { rank: 43, name: 'Will Zalatoris',              odds: '+8000',   tier: 'Alt' },
-  { rank: 44, name: 'Nicolai Hojgaard',            odds: '+9000',   tier: 'Alt' },
-  { rank: 45, name: 'Jacob Bridgeman',             odds: '+9000',   tier: 'Alt' },
-  { rank: 46, name: 'J.J. Spaun',                  odds: '+9000',   tier: 'Alt' },
-  { rank: 47, name: 'Harris English',              odds: '+9000',   tier: 'Alt' },
-  { rank: 48, name: 'Dustin Johnson',              odds: '+9000',   tier: 'Alt' },
-  { rank: 49, name: 'Sergio Garcia',               odds: '+10000',  tier: 'Alt' },
-  { rank: 50, name: 'Matt McCarty',                odds: '+10000',  tier: 'Alt' },
-  { rank: 51, name: 'Alex Noren',                  odds: '+10000',  tier: 'Alt' },
-  { rank: 52, name: 'Tony Finau',                  odds: '+10000',  tier: 'Alt' },
-  { rank: 53, name: 'Maverick McNealy',            odds: '+11000',  tier: 'Alt' },
-  { rank: 54, name: 'Ryan Gerard',                 odds: '+11000',  tier: 'Alt' },
-  { rank: 55, name: 'Ryan Fox',                    odds: '+12000',  tier: 'Alt' },
-  { rank: 56, name: 'Kurt Kitayama',               odds: '+12000',  tier: 'Alt' },
-  { rank: 57, name: 'Keegan Bradley',              odds: '+12000',  tier: 'Alt' },
-  { rank: 58, name: 'Harry Hall',                  odds: '+13000',  tier: 'Alt' },
-  { rank: 59, name: 'Aaron Rai',                   odds: '+13000',  tier: 'Alt' },
-  { rank: 60, name: 'Pierceson Coody',             odds: '+13000',  tier: 'Alt' },
-  { rank: 61, name: 'John Keefer',                 odds: '+13000',  tier: 'Alt' },
-  { rank: 62, name: 'Rasmus Neergaard-Petersen',   odds: '+13000',  tier: 'Alt' },
-  { rank: 63, name: 'Davis Thompson',              odds: '+14000',  tier: 'Alt' },
-  { rank: 64, name: 'Tom McKibbin',                odds: '+14000',  tier: 'Alt' },
-  { rank: 65, name: 'Taylor Pendrith',             odds: '+15000',  tier: 'Alt' },
-  { rank: 66, name: 'Tiger Woods',                 odds: '+15000',  tier: 'Alt' },
-  { rank: 67, name: 'Rasmus Hojgaard',             odds: '+15000',  tier: 'Alt' },
-  { rank: 68, name: 'Carlos Ortiz',                odds: '+15000',  tier: 'Alt' },
-  { rank: 69, name: 'Brian Harman',                odds: '+15000',  tier: 'Alt' },
-  { rank: 70, name: 'Sam Stevens',                 odds: '+15000',  tier: 'Alt' },
-  { rank: 71, name: 'Phil Mickelson',              odds: '+20000',  tier: 'Alt' },
-  { rank: 72, name: 'Michael Kim',                 odds: '+20000',  tier: 'Alt' },
-  { rank: 73, name: 'Casey Jarvis',                odds: '+20000',  tier: 'Alt' },
-  { rank: 74, name: 'Nico Echavarria',             odds: '+20000',  tier: 'Alt' },
-  { rank: 75, name: 'Andrew Novak',                odds: '+20000',  tier: 'Alt' },
-  { rank: 76, name: 'Aldrich Potgieter',           odds: '+20000',  tier: 'Alt' },
-  { rank: 77, name: 'Jayden Schaper',              odds: '+20000',  tier: 'Alt' },
-  { rank: 78, name: 'Nick Taylor',                 odds: '+25000',  tier: 'Alt' },
-  { rank: 79, name: 'Max Greyserman',              odds: '+25000',  tier: 'Alt' },
-  { rank: 80, name: 'Haotong Li',                  odds: '+25000',  tier: 'Alt' },
-  { rank: 81, name: 'Bubba Watson',                odds: '+25000',  tier: 'Alt' },
-  { rank: 82, name: 'Sami Valimaki',               odds: '+30000',  tier: 'Alt' },
-  { rank: 83, name: 'Davis Riley',                 odds: '+30000',  tier: 'Alt' },
-  { rank: 84, name: 'Kristoffer Reitan',           odds: '+30000',  tier: 'Alt' },
-  { rank: 85, name: 'Charl Schwartzel',            odds: '+35000',  tier: 'Alt' },
-  { rank: 86, name: 'Brian Campbell',              odds: '+40000',  tier: 'Alt' },
-  { rank: 87, name: 'Michael Brennan',             odds: '+40000',  tier: 'Alt' },
-  { rank: 88, name: 'Zach Johnson',                odds: '+40000',  tier: 'Alt' },
-  { rank: 89, name: 'Danny Willett',               odds: '+50000',  tier: 'Alt' },
-  { rank: 90, name: 'Angel Cabrera',               odds: '+50000',  tier: 'Alt' },
-  { rank: 91, name: 'Vijay Singh',                 odds: '+100000', tier: 'Alt' },
-  { rank: 92, name: 'Mike Weir',                   odds: '+100000', tier: 'Alt' },
-  { rank: 93, name: 'Fred Couples',                odds: '+100000', tier: 'Alt' },
-  { rank: 94, name: 'Brandon Holtz',               odds: '+200000', tier: 'Alt' },
-  { rank: 95, name: 'Mason Howell',                odds: '+200000', tier: 'Alt' },
-  { rank: 96, name: 'Jose Maria Olazabal',         odds: '+200000', tier: 'Alt' },
-  { rank: 97, name: 'Mateo Pulcini',               odds: '+200000', tier: 'Alt' },
-  { rank: 98, name: 'Jackson Herrington',          odds: '+200000', tier: 'Alt' },
-  { rank: 99, name: 'Ethan Fang',                  odds: '+200000', tier: 'Alt' },
-  { rank:100, name: 'Pongsapak Laopakdee',         odds: '+200000', tier: 'Alt' },
-  { rank:101, name: 'Naoyuki Kataoka',             odds: '+200000', tier: 'Alt' },
+  // Tier A (1-10)
+  { rank:  1, name: 'Scottie Scheffler',          odds: '+510',    tier: 'A' },
+  { rank:  2, name: 'Jon Rahm',                   odds: '+900',    tier: 'A' },
+  { rank:  3, name: 'Bryson DeChambeau',           odds: '+1050',   tier: 'A' },
+  { rank:  4, name: 'Rory McIlroy',               odds: '+1175',   tier: 'A' },
+  { rank:  5, name: 'Ludvig Aberg',                odds: '+1650',   tier: 'A' },
+  { rank:  6, name: 'Xander Schauffele',           odds: '+1750',   tier: 'A' },
+  { rank:  7, name: 'Cameron Young',               odds: '+2200',   tier: 'A' },
+  { rank:  8, name: 'Tommy Fleetwood',             odds: '+2250',   tier: 'A' },
+  { rank:  9, name: 'Matt Fitzpatrick',            odds: '+2300',   tier: 'A' },
+  { rank: 10, name: 'Hideki Matsuyama',            odds: '+2700',   tier: 'A' },
+  // Tier B (11-20)
+  { rank: 11, name: 'Collin Morikawa',             odds: '+3100',   tier: 'B' },
+  { rank: 12, name: 'Min Woo Lee',                 odds: '+3300',   tier: 'B' },
+  { rank: 13, name: 'Justin Rose',                 odds: '+3500',   tier: 'B' },
+  { rank: 14, name: 'Robert MacIntyre',            odds: '+3500',   tier: 'B' },
+  { rank: 15, name: 'Brooks Koepka',               odds: '+3700',   tier: 'B' },
+  { rank: 16, name: 'Patrick Reed',                odds: '+4200',   tier: 'B' },
+  { rank: 17, name: 'Jordan Spieth',               odds: '+4200',   tier: 'B' },
+  { rank: 18, name: 'Chris Gotterup',              odds: '+4300',   tier: 'B' },
+  { rank: 19, name: 'Viktor Hovland',              odds: '+4500',   tier: 'B' },
+  { rank: 20, name: 'Si Woo Kim',                  odds: '+5000',   tier: 'B' },
+  // Tier C (21-30)
+  { rank: 21, name: 'Akshay Bhatia',               odds: '+5100',   tier: 'C' },
+  { rank: 22, name: 'Russell Henley',              odds: '+5400',   tier: 'C' },
+  { rank: 23, name: 'Justin Thomas',               odds: '+5900',   tier: 'C' },
+  { rank: 24, name: 'Adam Scott',                  odds: '+6000',   tier: 'C' },
+  { rank: 25, name: 'Patrick Cantlay',             odds: '+6400',   tier: 'C' },
+  { rank: 26, name: 'Jake Knapp',                  odds: '+6400',   tier: 'C' },
+  { rank: 27, name: 'Shane Lowry',                 odds: '+6600',   tier: 'C' },
+  { rank: 28, name: 'Jason Day',                   odds: '+6800',   tier: 'C' },
+  { rank: 29, name: 'J.J. Spaun',                  odds: '+6800',   tier: 'C' },
+  { rank: 30, name: 'Sam Burns',                   odds: '+7000',   tier: 'C' },
+  // Alternate (31-91)
+  { rank: 31, name: 'Nicolai Hojgaard',            odds: '+7400',   tier: 'Alt' },
+  { rank: 32, name: 'Sepp Straka',                 odds: '+7600',   tier: 'Alt' },
+  { rank: 33, name: 'Maverick McNealy',            odds: '+7800',   tier: 'Alt' },
+  { rank: 34, name: 'Tyrrell Hatton',              odds: '+8000',   tier: 'Alt' },
+  { rank: 35, name: 'Jacob Bridgeman',             odds: '+8400',   tier: 'Alt' },
+  { rank: 36, name: 'Corey Conners',               odds: '+8400',   tier: 'Alt' },
+  { rank: 37, name: 'Kurt Kitayama',               odds: '+10000',  tier: 'Alt' },
+  { rank: 38, name: 'Harris English',              odds: '+10000',  tier: 'Alt' },
+  { rank: 39, name: 'Ben Griffin',                 odds: '+11000',  tier: 'Alt' },
+  { rank: 40, name: 'Cameron Smith',               odds: '+11000',  tier: 'Alt' },
+  { rank: 41, name: 'Sung-Jae Im',                 odds: '+11500',  tier: 'Alt' },
+  { rank: 42, name: 'Gary Woodland',               odds: '+12000',  tier: 'Alt' },
+  { rank: 43, name: 'Max Homa',                    odds: '+12000',  tier: 'Alt' },
+  { rank: 44, name: 'Daniel Berger',               odds: '+12000',  tier: 'Alt' },
+  { rank: 45, name: 'Rasmus Hojgaard',             odds: '+13000',  tier: 'Alt' },
+  { rank: 46, name: 'Keegan Bradley',              odds: '+14000',  tier: 'Alt' },
+  { rank: 47, name: 'Marco Penge',                 odds: '+14000',  tier: 'Alt' },
+  { rank: 48, name: 'Harry Hall',                  odds: '+15000',  tier: 'Alt' },
+  { rank: 49, name: 'Ryan Gerard',                 odds: '+15500',  tier: 'Alt' },
+  { rank: 50, name: 'Alex Noren',                  odds: '+16000',  tier: 'Alt' },
+  { rank: 51, name: 'Sam Stevens',                 odds: '+17000',  tier: 'Alt' },
+  { rank: 52, name: 'Nick Taylor',                 odds: '+19000',  tier: 'Alt' },
+  { rank: 53, name: 'Ryan Fox',                    odds: '+20000',  tier: 'Alt' },
+  { rank: 54, name: 'Wyndham Clark',               odds: '+20000',  tier: 'Alt' },
+  { rank: 55, name: 'Michael Kim',                 odds: '+21000',  tier: 'Alt' },
+  { rank: 56, name: 'Max Greyserman',              odds: '+21000',  tier: 'Alt' },
+  { rank: 57, name: 'Brian Harman',                odds: '+21000',  tier: 'Alt' },
+  { rank: 58, name: 'Kristoffer Reitan',           odds: '+22000',  tier: 'Alt' },
+  { rank: 59, name: 'Casey Jarvis',                odds: '+23000',  tier: 'Alt' },
+  { rank: 60, name: 'Carlos Ortiz',                odds: '+23000',  tier: 'Alt' },
+  { rank: 61, name: 'Sergio Garcia',               odds: '+25000',  tier: 'Alt' },
+  { rank: 62, name: 'Dustin Johnson',              odds: '+25000',  tier: 'Alt' },
+  { rank: 63, name: 'Aaron Rai',                   odds: '+25000',  tier: 'Alt' },
+  { rank: 64, name: 'Haotong Li',                  odds: '+27000',  tier: 'Alt' },
+  { rank: 65, name: 'Matt McCarty',                odds: '+28000',  tier: 'Alt' },
+  { rank: 66, name: 'Andrew Novak',                odds: '+29000',  tier: 'Alt' },
+  { rank: 67, name: 'Tom McKibbin',                odds: '+29000',  tier: 'Alt' },
+  { rank: 68, name: 'Rasmus Neergaard-Petersen',   odds: '+31000',  tier: 'Alt' },
+  { rank: 69, name: 'Nico Echavarria',             odds: '+32500',  tier: 'Alt' },
+  { rank: 70, name: 'Sami Valimaki',               odds: '+36000',  tier: 'Alt' },
+  { rank: 71, name: 'Aldrich Potgieter',           odds: '+36000',  tier: 'Alt' },
+  { rank: 72, name: 'John Keefer',                 odds: '+36000',  tier: 'Alt' },
+  { rank: 73, name: 'Michael Brennan',             odds: '+39000',  tier: 'Alt' },
+  { rank: 74, name: 'Bubba Watson',                odds: '+52500',  tier: 'Alt' },
+  { rank: 75, name: 'Zach Johnson',                odds: '+52500',  tier: 'Alt' },
+  { rank: 76, name: 'Charl Schwartzel',            odds: '+62500',  tier: 'Alt' },
+  { rank: 77, name: 'Davis Riley',                 odds: '+82500',  tier: 'Alt' },
+  { rank: 78, name: 'Mason Howell',                odds: '+200000', tier: 'Alt' },
+  { rank: 79, name: 'Danny Willett',               odds: '+225000', tier: 'Alt' },
+  { rank: 80, name: 'Angel Cabrera',               odds: '+300000', tier: 'Alt' },
+  { rank: 81, name: 'Brian Campbell',              odds: '+325000', tier: 'Alt' },
+  { rank: 82, name: 'Ethan Fang',                  odds: '+325000', tier: 'Alt' },
+  { rank: 83, name: 'Pongsapak Laopakdee',         odds: '+350000', tier: 'Alt' },
+  { rank: 84, name: 'Naoyuki Kataoka',             odds: '+450000', tier: 'Alt' },
+  { rank: 85, name: 'Brandon Holtz',               odds: '+500000', tier: 'Alt' },
+  { rank: 86, name: 'Vijay Singh',                 odds: '+500000', tier: 'Alt' },
+  { rank: 87, name: 'Mike Weir',                   odds: '+500000', tier: 'Alt' },
+  { rank: 88, name: 'Fred Couples',                odds: '+500000', tier: 'Alt' },
+  { rank: 89, name: 'Jose Maria Olazabal',         odds: '+500000', tier: 'Alt' },
+  { rank: 90, name: 'Mateo Pulcini',               odds: '+500000', tier: 'Alt' },
+  { rank: 91, name: 'Jackson Herrington',          odds: '+500000', tier: 'Alt' },
 ];
 
 // ── Paper Picks ──────────────────────────────────────────────────────────────
@@ -1336,7 +1326,7 @@ function buildPaperHTML(previewMode) {
     { key: 'A',   label: 'Tier A', sub: 'Ranks 1–10 · Pick one' },
     { key: 'B',   label: 'Tier B', sub: 'Ranks 11–20 · Pick one' },
     { key: 'C',   label: 'Tier C', sub: 'Ranks 21–30 · Pick one' },
-    { key: 'Alt', label: 'Alternate', sub: 'Ranks 31–101 · Slots in if a main misses cut' },
+    { key: 'Alt', label: 'Alternate', sub: 'Ranks 31–91 · Slots in if a main misses cut' },
   ];
 
   const tierHTML = tiers.map(t => {
@@ -1382,7 +1372,7 @@ function downloadPaperPicks() {
     { key: 'A',   label: 'Tier A',    sub: 'Ranks 1–10 · Pick one' },
     { key: 'B',   label: 'Tier B',    sub: 'Ranks 11–20 · Pick one' },
     { key: 'C',   label: 'Tier C',    sub: 'Ranks 21–30 · Pick one' },
-    { key: 'Alt', label: 'Alternate', sub: 'Ranks 31–101 · Slots in if a main misses cut' },
+    { key: 'Alt', label: 'Alternate', sub: 'Ranks 31–91 · Slots in if a main misses cut' },
   ];
 
   const tierBlocks = tiers.map(t => {
@@ -1520,13 +1510,18 @@ async function confirmReset() {
   try {
     const r = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
+      redirect: 'follow',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'resetPicks', adminKey: ADMIN_PASSWORD }),
     });
-    const d = await r.json();
+    let d;
+    try { d = await r.json(); } catch { d = {}; }
     if (d.error) throw new Error(d.error);
     picks = [];
-    showToast(`✅ All picks deleted (${d.deleted} removed)`);
+    showToast(`✅ All picks deleted${d.deleted != null ? ` (${d.deleted} removed)` : ''}`);
+    renderBoard();
+    // Reload from server to confirm
+    await loadPicks();
     renderBoard();
   } catch (e) { showToast('Error: ' + e.message, true); }
 }
