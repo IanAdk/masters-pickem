@@ -406,35 +406,6 @@
   }
 
   /* ESPN config */
-  .espn-config {
-    background: white;
-    border-radius: 8px;
-    padding: 14px 16px;
-    margin-bottom: 18px;
-    box-shadow: var(--shadow);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: .85rem;
-  }
-  .espn-config label { color: var(--green); font-weight: bold; white-space: nowrap; }
-  .espn-config input {
-    flex: 1;
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: .85rem;
-    font-family: monospace;
-  }
-  .espn-config button {
-    background: var(--green);
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: .82rem;
-  }
 
   /* ── Admin ── */
   /* ── Paper Picks ── */
@@ -653,11 +624,6 @@
       <button id="refresh-btn" onclick="loadScoreboard()">↻ Refresh</button>
     </div>
 
-    <div class="espn-config">
-      <label>ESPN Event ID:</label>
-      <input id="espn-event-id" type="text" value="" placeholder="e.g. 401703476" title="Find at site.api.espn.com/apis/site/v2/sports/golf/leaderboard — set the Masters event ID here">
-      <button onclick="saveEventId()">Set</button>
-    </div>
 
     <div id="espn-status">ESPN: not loaded</div>
     <div id="board-container"></div>
@@ -809,7 +775,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGnhAwJouWxqkQ
 const PICK_LOCK = new Date('2026-04-09T07:30:00-04:00');
 
 // ESPN API — event ID for The Masters 2026 (update once known)
-let ESPN_EVENT_ID = localStorage.getItem('mastersEventId') || '401811941';
+const ESPN_EVENT_ID = '401811941';
 
 // ── State ────────────────────────────────────────────────────────────────────
 let golfers   = [];   // all golfers from Apps Script
@@ -819,7 +785,6 @@ let selections = { A: null, B: null, C: null, Alt: null };
 let currentStep = 0;
 
 // ── Init ─────────────────────────────────────────────────────────────────────
-document.getElementById('espn-event-id').value = ESPN_EVENT_ID;
 updateLockBadge();
 showTab('board');
 loadAll();
@@ -946,11 +911,6 @@ function normName(n) {
   return n.toLowerCase().replace(/[^a-z ]/g, '').trim();
 }
 
-function saveEventId() {
-  ESPN_EVENT_ID = document.getElementById('espn-event-id').value.trim();
-  localStorage.setItem('mastersEventId', ESPN_EVENT_ID);
-  loadScoreboard();
-}
 
 // ── Scoreboard rendering ──────────────────────────────────────────────────────
 function renderBoard() {
