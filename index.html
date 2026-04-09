@@ -910,11 +910,12 @@ async function loadESPN() {
     for (const c of comp.competitors || []) {
       const name = c.athlete && c.athlete.displayName;
       if (!name) continue;
-      // status.detail gives relative-to-par string e.g. "-21(F)", "+3", "E"
-      const detail   = (c.status && c.status.detail) || c.score || '0';
+      const typeName = (c.status && c.status.type && c.status.type.name) || '';
+      // Players who haven't teed off yet — treat as even par
+      const scheduled = typeName === 'STATUS_SCHEDULED';
+      const detail   = scheduled ? 'E' : ((c.status && c.status.detail) || c.score || '0');
       const score    = parseScore(detail);
       const dispVal  = (c.status && c.status.displayValue) || '';
-      const typeName = (c.status && c.status.type && c.status.type.name) || '';
       const missed   = dispVal.toUpperCase() === 'CUT'
                     || typeName === 'STATUS_MISSED_CUT'
                     || dispVal.toUpperCase().includes('MC');
