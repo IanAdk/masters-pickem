@@ -876,16 +876,17 @@ async function loadESPN() {
       const name = c.athlete && c.athlete.displayName;
       if (!name) continue;
       const typeName = (c.status && c.status.type && c.status.type.name) || '';
-      // Players who haven't teed off yet — treat as even par
+      // Use cumulative score-to-par from statistics
+      const stats    = c.statistics && c.statistics[0];
       const scheduled = typeName === 'STATUS_SCHEDULED';
-      const detail   = scheduled ? 'E' : ((c.status && c.status.detail) || c.score || '0');
-      const score    = parseScore(detail);
+      const cumulative = stats && stats.displayValue ? stats.displayValue : '0';
+      const score    = scheduled ? 0 : parseScore(cumulative);
       const dispVal  = (c.status && c.status.displayValue) || '';
       const missed   = dispVal.toUpperCase() === 'CUT'
                     || typeName === 'STATUS_MISSED_CUT'
                     || dispVal.toUpperCase().includes('MC');
       const pos      = c.status && c.status.position && c.status.position.displayText || dispVal;
-      espnData[normName(name)] = { score, missedCut: missed, pos: pos || '', raw: detail };
+      espnData[normName(name)] = { score, missedCut: missed, pos: pos || '', raw: cumulative };
     }
     const live = event.status && event.status.type && event.status.type.name === 'STATUS_IN_PROGRESS';
     statusEl.textContent = live
@@ -908,7 +909,7 @@ function parseScore(s) {
 }
 
 function normName(n) {
-  return n.toLowerCase().replace(/[^a-z ]/g, '').trim();
+  return n.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z ]/g, '').trim();
 }
 
 
