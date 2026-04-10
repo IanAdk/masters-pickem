@@ -878,9 +878,8 @@ async function loadESPN() {
       const typeName = (c.status && c.status.type && c.status.type.name) || '';
       // Use cumulative score-to-par from statistics
       const stats    = c.statistics && c.statistics[0];
-      const scheduled = typeName === 'STATUS_SCHEDULED';
       const cumulative = stats && stats.displayValue ? stats.displayValue : '0';
-      const score    = scheduled ? 0 : parseScore(cumulative);
+      const score    = parseScore(cumulative);
       const dispVal  = (c.status && c.status.displayValue) || '';
       const missed   = dispVal.toUpperCase() === 'CUT'
                     || typeName === 'STATUS_MISSED_CUT'
